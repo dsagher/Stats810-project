@@ -1,5 +1,8 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
 import numpy as np
 
 df = pd.read_csv("smoking.csv") # load our dataset
@@ -41,3 +44,56 @@ Now our data is prepared for regression/model prediction by Dan
 We have X_train_pca and y_train for model training,
 and X_test_pca with y_test for evaluation of the model
 """
+
+"""
+Performing logistic regression on original data to preserve interpretability
+"""
+
+logreg = LogisticRegression(penalty='l2') # l2 to minimize colinearity
+
+logreg.fit(X_train, y_train)
+
+y_pred = logreg.predict(X_test)
+
+accuracy = accuracy_score(y_test, y_pred) # test accuracy
+
+print()
+print("=============LogReg on Original Data==================")
+print(f"Accuracy of Logistic Regression on original data: {accuracy:.02f}")
+
+coef = logreg.coef_
+
+def zip_cols(df, weights):
+
+    cols = np.array(df.columns)
+    coef = weights.reshape(-1,1)
+    return list(zip(cols, coef))
+
+zipped = zip_cols(df, coef)
+
+# Pull top three negative and top three positive predictors
+neg_predictors = sorted(zipped, key=lambda dct: dct[1])[:3] 
+pos_predictors = sorted(zipped, key=lambda dct:dct[1], reverse=True)[:3]
+
+
+
+print("Negative predictors of smoking: ", neg_predictors)
+print("Positive predictors of smoking: ", pos_predictors)
+print()
+
+"""
+
+
+"""
+print(print("=============LogReg on Principal Components=================="))
+
+logreg = LogisticRegression(penalty='l2')
+
+logreg.fit(X_train_pca, y_train)
+
+y_pred_pca = logreg.predict(X_test_pca)
+
+accuracy = accuracy_score(y_test, y_pred_pca)
+
+print(f"Accuracy of Logistic Regression on Principal Components: {accuracy: .02f}")
+print()
