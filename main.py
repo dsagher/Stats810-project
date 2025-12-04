@@ -59,9 +59,10 @@ accuracy = accuracy_score(y_test, y_pred) # test accuracy
 
 print()
 print("=============LogReg on Original Data==================")
-print(f"Accuracy of Logistic Regression on original data: {accuracy:.02f}")
+print(f"Accuracy of Logistic Regression on original data: {accuracy:.02f}\n")
 
-coef = logreg.coef_
+odds_ratio = np.exp(logreg.coef_)
+coefs = logreg.coef_
 
 def zip_cols(df, weights):
 
@@ -69,23 +70,26 @@ def zip_cols(df, weights):
     coef = weights.reshape(-1,1)
     return list(zip(cols, coef))
 
-zipped = zip_cols(df, coef)
+zipped_odds = zip_cols(df, odds_ratio)
+zipped_coefs = zip_cols(df, coefs)
 
 # Pull top three negative and top three positive predictors
-neg_predictors = sorted(zipped, key=lambda dct: dct[1])[:3] 
-pos_predictors = sorted(zipped, key=lambda dct:dct[1], reverse=True)[:3]
+neg_predictors = sorted(zipped_coefs, key=lambda dct: dct[1])[:3] 
+pos_predictors = sorted(zipped_coefs, key=lambda dct:dct[1], reverse=True)[:3]
+
+for i in neg_predictors:
+    print(f"Negative Predictor: {i[0]}, Coefficient: {i[1]}\n")
+for i in pos_predictors:
+    print(f"Positive Predictor: {i[0]}, Coefficient: {i[1]}\n")
 
 
-
-print("Negative predictors of smoking: ", neg_predictors)
-print("Positive predictors of smoking: ", pos_predictors)
 print()
 
 """
 
 
 """
-print(print("=============LogReg on Principal Components=================="))
+print("=============LogReg on Principal Components==================")
 
 logreg = LogisticRegression(penalty='l2')
 
