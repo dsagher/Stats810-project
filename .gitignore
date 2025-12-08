@@ -3,3 +3,4 @@ venv/
 env/
 logreg.ipynb
 .vscode
+smoking_odds.csv
