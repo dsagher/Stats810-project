@@ -45,24 +45,18 @@ We have X_train_pca and y_train for model training,
 and X_test_pca with y_test for evaluation of the model
 """
 
-"""
-Performing logistic regression on original data to preserve interpretability
-"""
+"""=============LogReg on Original Data=================="""
 
-logreg = LogisticRegression(penalty='l2') # l2 to minimize colinearity
+logreg = LogisticRegression(penalty='l2') 
 
 logreg.fit(X_train, y_train)
 
 y_pred = logreg.predict(X_test)
 
-accuracy = accuracy_score(y_test, y_pred) # test accuracy
+accuracy = accuracy_score(y_test, y_pred) 
 
-print()
-print("=============LogReg on Original Data==================")
-print(f"Accuracy of Logistic Regression on original data: {accuracy:.02f}\n")
 
 odds_ratio = np.exp(logreg.coef_)
-coefs = logreg.coef_
 
 def zip_cols(df, weights):
 
@@ -71,25 +65,22 @@ def zip_cols(df, weights):
     return list(zip(cols, coef))
 
 zipped_odds = zip_cols(df, odds_ratio)
-zipped_coefs = zip_cols(df, coefs)
+odds_sorted = sorted(zipped_odds, key=lambda dct:dct[1], reverse=True)
 
-# Pull top three negative and top three positive predictors
-neg_predictors = sorted(zipped_coefs, key=lambda dct: dct[1])[:3] 
-pos_predictors = sorted(zipped_coefs, key=lambda dct:dct[1], reverse=True)[:3]
+rows = []
+for i in odds_sorted:
+    feature = i[0]
+    odds = i[1]
+    pct = round((odds.tolist()[0] - 1)* 100,2)
+    if pct < 10 and pct > -10:
+        continue
+    row = {"feature": feature, "odds": pct}
+    rows.append(row)
 
-for i in neg_predictors:
-    print(f"Negative Predictor: {i[0]}, Coefficient: {i[1]}\n")
-for i in pos_predictors:
-    print(f"Positive Predictor: {i[0]}, Coefficient: {i[1]}\n")
+df = pd.DataFrame(rows)
+df.to_csv("smoking_odds.csv", index=True)
 
-
-print()
-
-"""
-
-
-"""
-print("=============LogReg on Principal Components==================")
+"""=============LogReg on Principal Components=================="""
 
 logreg = LogisticRegression(penalty='l2')
 
@@ -98,6 +89,3 @@ logreg.fit(X_train_pca, y_train)
 y_pred_pca = logreg.predict(X_test_pca)
 
 accuracy = accuracy_score(y_test, y_pred_pca)
-
-print(f"Accuracy of Logistic Regression on Principal Components: {accuracy: .02f}")
-print()
